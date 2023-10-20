@@ -178,9 +178,6 @@ class Gameboard {
             return b.score - a.score;
         });
 
-        // TODO: recurse here I think
-
-        // try each candidate
         eachcandidate: for (let x = 0 ; x < candidates.length ; x++) {
             let gbmaybe = _.cloneDeep(this.gameboard);
             let keymaybe = _.cloneDeep(this.answerkey);
@@ -198,7 +195,6 @@ class Gameboard {
 
             // bug is here - we're exiting early? If the loop above finishes then we're calling it a win, b
             // not backing up
-
             console.log("Placed " + candidates[x] + "\n");
             this.answerkey = keymaybe;
             this.gameboard = gbmaybe;
