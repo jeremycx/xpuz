@@ -1,0 +1,14 @@
+{
+  "name": "xpuz",
+  "version": "1.0.0",
+  "description": "Xword Puzzle Generator",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jeremy Childs",
+  "license": "ISC",
+  "dependencies": {
+    "lodash": "^4.17.21"
+  }
+}
