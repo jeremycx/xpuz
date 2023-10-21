@@ -171,10 +171,7 @@ class Gameboard {
         //       as we're going to walk the list trying all the
         //       candidates in reverse score until one doesn't
         //       fail downstream
-        candidates = _.shuffle(candidates);
-
-
-        candidates.sort((a,b) => {
+        candidates = _.shuffle(candidates).sort((a,b) => {
             return b.score - a.score;
         });
 
