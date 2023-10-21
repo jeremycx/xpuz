@@ -33,40 +33,31 @@ class Word {
 
 class Gameboard {
     gameboard = [];
-    answerkey = [];
 
     constructor(width, height, wordlist, gameboard, answerkey) {
-        this.width = width;
-        this.height = height;
-
-        if (gameboard !== undefined) {
-            this.gameboard = gameboard;
+       if (width instanceof Gameboard) {
+            this.clone(width);
         } else {
+            this.width = width;
+            this.height = height;
             this.creategameboard(width, height);
+            this.answerkey = "";
+            this.wordlist = wordlist.sort((a,b) => {
+                return b.length - a.length;
+            });
         }
 
-        if (answerkey === undefined) {
-            this.answerkey = [];
-        } else {
-            this.answerkey = answerkey;
-        }
+        this.myword = this.wordlist.shift();
 
-        this.wordlist = wordlist.sort((a,b) => {
-            return b.length - a.length;
-        });
+        for (let x = 0 ; x < this.wordlist.length ; x++) {
+            let res;
 
-        if (this.wordlist.length == 0) {
-            // solved it.
-            this.show();
-            return;
-        }
+            res = this.place(this.wordlist.shift());
 
-        for (let x = 0 ; x < wordlist.length ; x++) {
-            try {
-                this.place(this.wordlist.shift());
-            } catch (e) {
-                throw e;
+            if (res === undefined) {
+                return undefined;
             }
+            return res;
         }
     }
 
@@ -79,6 +70,14 @@ class Gameboard {
             }
         }
         this.gameboard = g;
+    }
+
+    clone(obj) {
+        this.answerkey = obj.answerkey;
+        this.gameboard = _.deepCopy(obj.gameboard);
+        this.height = obj.height;
+        this.width = obj.width;
+        this.wordlist = _.deepCopy(obj.wordlist);
     }
 
 
