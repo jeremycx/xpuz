@@ -24,9 +24,8 @@ class Word {
         return msg;
     }
 
-    toShortString() {
-        let msg = `${this.word}${this.direction == "HORIZONTAL" ? "-" : "|"}(${x}${y}) ${this.score} ->`;
-
+    toShortString(listsize_fyi) {
+        return `${this.word}${this.direction == "HORIZONTAL" ? "-" : "|"}(${this.x},${this.y})[${this.score},${listsize_fyi}]->`;
     }
 
 }
@@ -48,17 +47,19 @@ class Gameboard {
         }
 
         this.myword = this.wordlist.shift();
-
-        for (let x = 0 ; x < this.wordlist.length ; x++) {
-            let res;
-
-            res = this.place(this.wordlist.shift());
-
-            if (res === undefined) {
-                return undefined;
-            }
-            return res;
+        if (this.wordlist.length == 0) {
+            return this;
         }
+        console.log(this.answerkey);
+
+        let res;
+
+        res = this.place(this.myword);
+
+        if (res === undefined) {
+            return undefined;
+        }
+        return res;
     }
 
     creategameboard(width, height) {
@@ -74,10 +75,10 @@ class Gameboard {
 
     clone(obj) {
         this.answerkey = obj.answerkey;
-        this.gameboard = _.deepCopy(obj.gameboard);
+        this.gameboard = _.cloneDeep(obj.gameboard);
         this.height = obj.height;
         this.width = obj.width;
-        this.wordlist = _.deepCopy(obj.wordlist);
+        this.wordlist = _.cloneDeep(obj.wordlist);
     }
 
 
@@ -99,10 +100,11 @@ class Gameboard {
 
         let gb = this.gameboard;
         let candidates = [];
-        let score = 0;
+        let score;
 
         checkrow: for (let y = 0 ; y < this.height ; y++) {
             checkcolumn: for (let x = 0 ; x < this.width ; x++) {
+                score = 0;
                 // check the word against pos y, x
                 if (x + word.length >= this.width) {
                     continue checkrow;
@@ -138,7 +140,7 @@ class Gameboard {
         checkrow: for (let y = 0 ; y < this.height ; y++) {
             checkcolumn: for (let x = 0 ; x < this.width ; x++) {
                 // check the word against pos y, x
-                if (y + word.length >= this.height) {
+                if (y + word.length >= this.height) { // won't fit in the grid
                     continue checkrow;
                 }
                 for (let c = 0 ; c < word.length ; c++) {
@@ -168,7 +170,7 @@ class Gameboard {
         candidates = _.concat(candidates, this.checkfit_v(word));
 
         if (candidates.length == 0) {
-            throw new Error("No candidates on this branch");
+            return undefined;
         }
 
         // TODO: shuffle here to induce randomness in sorting
@@ -180,45 +182,33 @@ class Gameboard {
             return b.score - a.score;
         });
 
-        eachcandidate: for (let x = 0 ; x < candidates.length ; x++) {
-            let gbmaybe = _.cloneDeep(this.gameboard);
-            let keymaybe = _.cloneDeep(this.answerkey);
+        for (let x = 0 ; x < candidates.length ; x++) {
+            let provisionalThis = _.cloneDeep(this);
 
-            this.insertWord(gbmaybe, candidates[x]);
-            keymaybe.push(candidates[x]);
+            provisionalThis.insertWord(candidates[x]);
+            provisionalThis.answerkey = (provisionalThis.answerkey += candidates[x].toShortString(candidates.length));
 
-            try {
-                console.log("---\nTrying word " + x + " of " + candidates.length + "\n" + candidates[x].toString() + "\n");
-                new Gameboard(this.width, this.height, this.wordlist, gbmaybe, keymaybe);
-            } catch (e) {
-                console.log("No Bueno");
-                continue eachcandidate;
+            let res = new Gameboard(provisionalThis);
+
+            if (res !== undefined) {
+                return res;
             }
-
-            // bug is here - we're exiting early? If the loop above finishes then we're calling it a win, b
-            // not backing up
-            console.log("Placed " + candidates[x] + "\n");
-            this.answerkey = keymaybe;
-            this.gameboard = gbmaybe;
-            this.show();
-            process.exit(1);
         }
 
-        return;
+        return undefined;
     }
 
 
-    insertWord(gameboard, candidate) {
+    insertWord(candidate) {
         if (candidate.direction == HORIZONTAL) {
             for (let c = 0 ; c < candidate.word.length ; c++) {
-                gameboard[candidate.y][candidate.x + c] = candidate.word[c];
+                this.gameboard[candidate.y][candidate.x + c] = candidate.word[c];
             }
         } else {
             for (let c = 0 ; c < candidate.word.length ; c++) {
-                gameboard[candidate.y + c][candidate.x] = candidate.word[c];
+                this.gameboard[candidate.y + c][candidate.x] = candidate.word[c];
             }
         }
-        this.answerkey.push(candidate);
     }
 
     show() {
