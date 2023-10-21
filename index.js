@@ -23,6 +23,12 @@ class Word {
         msg +=  "dir:   " + (this.direction == 0 ? "ACROSS" : "DOWN") + "\n";
         return msg;
     }
+
+    toShortString() {
+        let msg = `${this.word}${this.direction == "HORIZONTAL" ? "-" : "|"}(${x}${y}) ${this.score} ->`;
+
+    }
+
 }
 
 class Gameboard {
@@ -236,10 +242,6 @@ class Gameboard {
         console.log(row);
     }
 }
-
-
-
-
 
 
 // -------------------- Test Section ---------------------
