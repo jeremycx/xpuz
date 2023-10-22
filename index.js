@@ -33,7 +33,7 @@ class Word {
 class Gameboard {
     gameboard = [];
 
-    constructor(width, height, wordlist, gameboard, answerkey) {
+    constructor(width, height, wordlist) {
        if (width instanceof Gameboard) {
             this.clone(width);
         } else {
@@ -47,19 +47,7 @@ class Gameboard {
         }
 
         this.myword = this.wordlist.shift();
-        if (this.wordlist.length == 0) {
-            return this;
-        }
         console.log(this.answerkey);
-
-        let res;
-
-        res = this.place(this.myword);
-
-        if (res === undefined) {
-            return undefined;
-        }
-        return res;
     }
 
     creategameboard(width, height) {
@@ -101,16 +89,19 @@ class Gameboard {
         let gb = this.gameboard;
         let candidates = [];
         let score;
+        let hitspace;
 
         checkrow: for (let y = 0 ; y < this.height ; y++) {
             checkcolumn: for (let x = 0 ; x < this.width ; x++) {
                 score = 0;
+                hitspace = false;
                 // check the word against pos y, x
                 if (x + word.length >= this.width) {
                     continue checkrow;
                 }
                 for (let c = 0 ; c < word.length ; c++) {
                     if (gb[y][x+c] == "-") {
+                        hitspace = true;
                         continue;
                     }
                     if (gb[y][x+c] == word[c]) {
@@ -121,6 +112,11 @@ class Gameboard {
                     // proceed to next x position
                     continue checkcolumn;
                 }
+                if (hitspace == false) {
+                    // it doesn't fit if it's overtop the same word, so we insist the attempt hit at least one empty space
+                    continue checkcolumn;
+                }
+
                 // we got to the end of the word! It's a candidate!
                 candidates.push(new Word(score, word, x, y, HORIZONTAL));
             }
@@ -135,16 +131,20 @@ class Gameboard {
 
         let gb = this.gameboard;
         let candidates = [];
-        let score = 0;
+        let score;
+        let hitspace;
 
         checkrow: for (let y = 0 ; y < this.height ; y++) {
             checkcolumn: for (let x = 0 ; x < this.width ; x++) {
+                score = 0;
+                hitspace = false;
                 // check the word against pos y, x
                 if (y + word.length >= this.height) { // won't fit in the grid
                     continue checkrow;
                 }
                 for (let c = 0 ; c < word.length ; c++) {
                     if (gb[y+c][x] == "-") {
+                        hitspace = true;
                         continue;
                     }
                     if (gb[y+c][x] == word[c]) {
@@ -155,6 +155,11 @@ class Gameboard {
                     // proceed to next x position
                     continue checkcolumn;
                 }
+                if (hitspace == false) {
+                    // it doesn't fit if it's overtop the same word, so we insist the attempt hit at least one empty space
+                    continue checkcolumn;
+                }
+
                 // we got to the end of the word! It's a candidate!
                 candidates.push(new Word(score, word, x, y, VERTICAL));
             }
@@ -163,11 +168,11 @@ class Gameboard {
     }
 
 
-    place(word) {
+    place() {
         let candidates = [];
 
-        candidates = this.checkfit_h(word);
-        candidates = _.concat(candidates, this.checkfit_v(word));
+        candidates = this.checkfit_h(this.word);
+        candidates = _.concat(candidates, this.checkfit_v(this.word));
 
         if (candidates.length == 0) {
             return undefined;
@@ -188,7 +193,7 @@ class Gameboard {
             provisionalThis.insertWord(candidates[x]);
             provisionalThis.answerkey = (provisionalThis.answerkey += candidates[x].toShortString(candidates.length));
 
-            let res = new Gameboard(provisionalThis);
+            let res = new Gameboard(provisionalThis).place();
 
             if (res !== undefined) {
                 return res;
@@ -235,7 +240,7 @@ class Gameboard {
 
 // -------------------- Test Section ---------------------
 
-let x = new Gameboard(10, 10, [
+let x = new Gameboard(20, 20, [
     "one",
     "two",
     "three",
@@ -261,3 +266,5 @@ let x = new Gameboard(10, 10, [
     "fifty",
     "oclock"
 ]);
+
+console.log(x.show());
