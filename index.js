@@ -171,8 +171,12 @@ class Gameboard {
     place() {
         let candidates = [];
 
-        candidates = this.checkfit_h(this.word);
-        candidates = _.concat(candidates, this.checkfit_v(this.word));
+        if (this.myword === undefined) {
+            return this;
+        }
+
+        candidates = this.checkfit_h(this.myword);
+        candidates = _.concat(candidates, this.checkfit_v(this.myword));
 
         if (candidates.length == 0) {
             return undefined;
@@ -240,7 +244,7 @@ class Gameboard {
 
 // -------------------- Test Section ---------------------
 
-let x = new Gameboard(20, 20, [
+let x = new Gameboard(8, 14, [
     "one",
     "two",
     "three",
@@ -265,6 +269,8 @@ let x = new Gameboard(20, 20, [
     "forty",
     "fifty",
     "oclock"
-]);
+]).place();
+
+
 
 console.log(x.show());
