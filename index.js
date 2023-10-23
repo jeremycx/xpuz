@@ -279,6 +279,4 @@ let x = new Gameboard(10, 10, [
     "oh"
 ]).place();
 
-
-
 console.log(x.show());
