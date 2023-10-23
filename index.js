@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const util = require('node:util');
+const readline = require('node:readline');
 
 const HORIZONTAL = 0;
 const VERTICAL = 1;
@@ -47,7 +48,6 @@ class Gameboard {
         }
 
         this.myword = this.wordlist.shift();
-        console.log(this.answerkey);
     }
 
     creategameboard(width, height) {
@@ -171,6 +171,13 @@ class Gameboard {
     place() {
         let candidates = [];
 
+        // console.clear();
+        // console.log(this.answerkey);
+        readline.cursorTo(process.stdout, 0);
+        readline.clearLine(process.stdout);
+        process.stdout.write(this.answerkey);
+
+
         if (this.myword === undefined) {
             return this;
         }
@@ -195,7 +202,7 @@ class Gameboard {
             let provisionalThis = _.cloneDeep(this);
 
             provisionalThis.insertWord(candidates[x]);
-            provisionalThis.answerkey = (provisionalThis.answerkey += candidates[x].toShortString(candidates.length));
+            provisionalThis.answerkey = (provisionalThis.answerkey += candidates[x].toShortString("" + x + "/" + candidates.length));
 
             let res = new Gameboard(provisionalThis).place();
 
@@ -221,22 +228,22 @@ class Gameboard {
     }
 
     show() {
-        let row = "" + util.inspect(this.answerkey);
+        let row = this.answerkey;
 
-        row += "\nWords: " + this.answerkey.length + "\n  ";
+        row += "\n\n   ";
 
         for (let x = 0 ; x < this.width ; x++) {
             row = row + x + " ";
         }
         row = row + "\n";
 
-        for (let y = 0 ; y < this.height ; y++) {
-            row += y + " ";
-            for (let x = 0 ; x < this.width ; x++) {
-                row = row + this.gameboard[y][x] + " ";
-            }
+        this.gameboard.forEach((val, idx) => {
+            row += (idx < 10 ? " " : "") + idx + " ";
+            val.forEach((val) => {
+                row = row + val + " ";
+            });
             row = row + "\n";
-        }
+        });
         console.log(row);
     }
 }
@@ -244,7 +251,7 @@ class Gameboard {
 
 // -------------------- Test Section ---------------------
 
-let x = new Gameboard(8, 14, [
+let x = new Gameboard(10, 10, [
     "one",
     "two",
     "three",
@@ -268,7 +275,8 @@ let x = new Gameboard(8, 14, [
     "thirty",
     "forty",
     "fifty",
-    "oclock"
+    "oclock",
+    "oh"
 ]).place();
 
 
